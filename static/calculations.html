@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Calculations</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="navbar"></div>
+
+<div class="container">
+
+  <div class="card">
+    <h2>Body Summary</h2>
+    <button onclick="loadSummary()">Refresh</button>
+    <div id="summaryBox" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="card">
+    <h2>Calorie Targets</h2>
+    <input id="deficitRate" type="number" step="0.1" placeholder="Weight loss per week (kg)">
+    <button onclick="calculateCalories()">Calculate</button>
+
+    <div id="calorieBox" style="margin-top:10px;"></div>
+  </div>
+
+</div>
+
+<script src="calculations.js"></script>
+
+<script>
+fetch("/static/components/navbar.html")
+  .then(r => r.text())
+  .then(html => navbar.innerHTML = html);
+</script>
+
+</body>
+</html>

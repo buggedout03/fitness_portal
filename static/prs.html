@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PRs</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="navbar"></div>
+
+<div class="container">
+
+  <div class="card">
+    <h2>New PR</h2>
+    <input id="exercise" type="text" placeholder="Exercise name">
+    <input id="prWeight" type="number" placeholder="Weight">
+    <input id="prReps" type="number" placeholder="Reps">
+    <button onclick="submitPR()">Submit</button>
+  </div>
+
+  <div class="card">
+    <h2>PR History</h2>
+    <div id="list"></div>
+  </div>
+
+</div>
+
+<script src="prs.js"></script>
+
+<script>
+fetch("/static/components/navbar.html")
+  .then(r => r.text())
+  .then(html => navbar.innerHTML = html);
+</script>
+
+</body>
+</html>

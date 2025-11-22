@@ -1,0 +1,42 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #111;
+  color: white;
+}
+
+.container {
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+}
+
+.card {
+  background: #1b1b1b;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px #0005;
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
+.navbar {
+  background: #181818;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+.navbar a {
+  color: #0af;
+  margin-right: 15px;
+  text-decoration: none;
+  font-size: 18px;
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+}
