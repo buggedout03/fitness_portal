@@ -1,33 +1,36 @@
 const USER_ID = 1;
 let latestTDEE = null;
 
-// ----------------------------
-// Load summary (BF%, BMI, TDEE)
-// ----------------------------
 async function loadSummary() {
     const res = await fetch(`/analytics/body/summary?user_id=${USER_ID}`);
     const data = await res.json();
 
     if (data.error) {
         summaryBox.innerHTML = "Missing data. Enter weight + measurements first.";
+        latestTDEE = null;
         return;
     }
 
-    latestTDEE = data.tdee;
+    latestTDEE = data.tdee || null;
+
+    const bf = data.body_fat_percent;
+    const bmiVal = data.bmi;
+    const tdeeVal = data.tdee;
+
+    const bfText = (bf != null) ? `${bf.toFixed(1)}%` : "N/A";
+    const bmiText = (bmiVal != null) ? bmiVal.toFixed(1) : "N/A";
+    const tdeeText = (tdeeVal != null) ? `${Math.round(tdeeVal)} kcal/day` : "N/A";
 
     summaryBox.innerHTML = `
-        <b>Body Fat:</b> ${data.body_fat_percent.toFixed(1)}%<br>
-        <b>BMI:</b> ${data.bmi.toFixed(1)}<br>
-        <b>TDEE:</b> ${Math.round(data.tdee)} kcal/day
+        <b>Body Fat:</b> ${bfText}<br>
+        <b>BMI:</b> ${bmiText}<br>
+        <b>TDEE:</b> ${tdeeText}
     `;
 }
 
-// ----------------------------
-// Calorie deficit calculator
-// ----------------------------
 function calculateCalories() {
     if (!latestTDEE) {
-        calorieBox.innerHTML = "Load summary first.";
+        calorieBox.innerHTML = "Load summary first or ensure TDEE is available.";
         return;
     }
 
@@ -37,12 +40,8 @@ function calculateCalories() {
         return;
     }
 
-    // ~770 kcal per kg loss per day? No.
-    // Real formula: 1 kg fat ≈ 7700 kcal
-    // Weekly loss → divide by 7
     const kcalPerKg = 7700;
     const dailyDeficit = (rate * kcalPerKg) / 7;
-
     const target = latestTDEE - dailyDeficit;
 
     calorieBox.innerHTML = `
@@ -51,5 +50,5 @@ function calculateCalories() {
     `;
 }
 
-// Load initial summary
+// initial
 loadSummary();

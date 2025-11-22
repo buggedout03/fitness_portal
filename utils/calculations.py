@@ -78,18 +78,40 @@ def linear_regression(data: List[Tuple[str, float]]):
 # --------------------------
 
 def navy_body_fat(height_cm, waist_cm, neck_cm, hips_cm=None, gender="male"):
-    if gender == "male":
-        return (
-            86.010 * math.log10(waist_cm - neck_cm)
-            - 70.041 * math.log10(height_cm)
-            + 36.76
-        )
-    else:
-        return (
-            163.205 * math.log10(waist_cm + hips_cm - neck_cm)
-            - 97.684 * math.log10(height_cm)
-            - 78.387
-        )
+    """
+    Returns body fat % or None if inputs are invalid for the Navy method.
+    """
+    # Basic sanity
+    if not height_cm or not waist_cm or not neck_cm:
+        return None
+
+    try:
+        if gender == "male":
+            # Navy method requires waist > neck and positive height
+            if waist_cm <= neck_cm or height_cm <= 0:
+                return None
+
+            return (
+                86.010 * math.log10(waist_cm - neck_cm)
+                - 70.041 * math.log10(height_cm)
+                + 36.76
+            )
+
+        else:
+            # For females we need hips, and waist + hips > neck
+            if hips_cm is None or height_cm <= 0:
+                return None
+            if waist_cm + hips_cm <= neck_cm:
+                return None
+
+            return (
+                163.205 * math.log10(waist_cm + hips_cm - neck_cm)
+                - 97.684 * math.log10(height_cm)
+                - 78.387
+            )
+    except (ValueError, TypeError):
+        # Anything weird → just say "no valid BF result"
+        return None
 
 
 # --------------------------
