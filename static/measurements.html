@@ -22,9 +22,19 @@
   </div>
 
   <div class="card">
-    <h2>Waist Trend</h2>
-    <div class="chart-container">
-      <canvas id="waistChart"></canvas>
+    <h2>Measurement Trend</h2>
+
+    <label for="metricSelect">Metric:</label>
+    <select id="metricSelect" onchange="renderChart()">
+      <option value="waist_cm">Waist (cm)</option>
+      <option value="hips_cm">Hips (cm)</option>
+      <option value="neck_cm">Neck (cm)</option>
+      <option value="shoulder_cm">Shoulders (cm)</option>
+      <option value="chest_cm">Chest (cm)</option>
+    </select>
+
+    <div class="chart-container" style="margin-top:10px;">
+      <canvas id="measurementChart"></canvas>
     </div>
   </div>
 

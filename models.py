@@ -24,7 +24,7 @@ class MeasurementLog(Base):
     __tablename__ = "measurement_logs"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignForeignKey("users.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
     date = Column(String)
     waist_cm = Column(Float)
     hips_cm = Column(Float)
