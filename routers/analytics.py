@@ -84,37 +84,67 @@ def measurement_trends(user_id: int, db: Session = Depends(get_db)):
 # 3. Body Fat, BMI, TDEE
 # --------------------------
 
+
 @router.get("/body/summary")
 def body_summary(user_id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
-    latest = (
+
+    # Grab ALL measurements, newest → oldest
+    measurement_rows = (
         db.query(models.MeasurementLog)
         .filter(models.MeasurementLog.user_id == user_id)
-        .order_by(models.MeasurementLog.date.desc())
-        .first()
+        .order_by(models.MeasurementLog.date.desc(), models.MeasurementLog.id.desc())
+        .all()
     )
+
+    # Latest weight only
     latest_weight = (
         db.query(models.WeightLog)
         .filter(models.WeightLog.user_id == user_id)
-        .order_by(models.WeightLog.date.desc())
+        .order_by(models.WeightLog.date.desc(), models.WeightLog.id.desc())
         .first()
     )
 
-    if not (user and latest and latest_weight):
+    if not (user and measurement_rows and latest_weight):
         return {"error": "missing data"}
 
-    bf = navy_body_fat(
-        height_cm=user.height_cm,
-        waist_cm=latest.waist_cm,
-        neck_cm=latest.neck_cm,
-        hips_cm=latest.hips_cm,
-        gender=user.gender
-    )
+    # Find the most recent measurement row that produces a valid BF%
+    bf = None
+    used_measurement_id = None
+
+    for m in measurement_rows:
+        bf_candidate = navy_body_fat(
+            height_cm=user.height_cm,
+            waist_cm=m.waist_cm,
+            neck_cm=m.neck_cm,
+            hips_cm=m.hips_cm,
+            gender=user.gender,
+        )
+        if bf_candidate is not None:
+            bf = bf_candidate
+            used_measurement_id = m.id
+            break
+
+    # BMI & TDEE (should basically always work if height & weight are sane)
+    bmi_val = None
+    tdee_val = None
+
+    try:
+        bmi_val = bmi(latest_weight.weight, user.height_cm)
+    except Exception:
+        pass
+
+    try:
+        tdee_val = tdee(latest_weight.weight, user.height_cm, user.age, user.gender)
+    except Exception:
+        pass
 
     return {
         "body_fat_percent": bf,
-        "bmi": bmi(latest_weight.weight, user.height_cm),
-        "tdee": tdee(latest_weight.weight, user.height_cm, user.age, user.gender),
+        "bmi": bmi_val,
+        "tdee": tdee_val,
+        # optional debug info, front-end can ignore this
+        "measurement_used_id": used_measurement_id,
     }
 
 
