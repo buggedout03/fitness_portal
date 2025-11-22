@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GLP-1 Logs</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div id="navbar"></div>
+
+<div class="container">
+
+  <div class="card">
+    <h2>Enter GLP-1 Dose</h2>
+    <input id="dose" type="number" step="0.1" placeholder="Dose (mg)">
+    <input id="halflife" type="number" step="0.1" placeholder="Half-life (days)">
+    <button onclick="submitGLP()">Submit</button>
+  </div>
+
+  <div class="card">
+    <h2>7-Day GLP-1 Decay</h2>
+    <div class="chart-container">
+      <canvas id="glpChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<script src="glp1.js"></script>
+
+<script>
+fetch("/components/navbar.html")
+  .then(r => r.text())
+  .then(html => navbar.innerHTML = html);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Workouts</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="navbar"></div>
+
+<div class="container">
+
+  <div class="card">
+    <h2>New Workout</h2>
+    <input id="workoutName" type="text" placeholder="Workout Name">
+    <textarea id="exercises" placeholder='Enter exercises as JSON:
+[
+  {"name":"Bench", "sets":[{"w":60,"r":5}]}
+]'></textarea>
+    <button onclick="submitWorkout()">Submit</button>
+  </div>
+
+  <div class="card">
+    <h2>Workout History</h2>
+    <div id="list"></div>
+  </div>
+
+</div>
+
+<script src="workouts.js"></script>
+
+<script>
+fetch("/static/components/navbar.html")
+  .then(r => r.text())
+  .then(html => navbar.innerHTML = html);
+</script>
+
+</body>
+</html>

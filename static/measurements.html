@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Measurements</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div id="navbar"></div>
+
+<div class="container">
+
+  <div class="card">
+    <h2>Enter Measurements</h2>
+    <input id="waist" type="number" step="0.1" placeholder="Waist (cm)">
+    <input id="hips" type="number" step="0.1" placeholder="Hips (cm)">
+    <input id="neck" type="number" step="0.1" placeholder="Neck (cm)">
+    <input id="shoulder" type="number" step="0.1" placeholder="Shoulders (cm)">
+    <input id="chest" type="number" step="0.1" placeholder="Chest (cm)">
+    <button onclick="submitMeasurements()">Submit</button>
+  </div>
+
+  <div class="card">
+    <h2>Waist Trend</h2>
+    <div class="chart-container">
+      <canvas id="waistChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<script src="measurements.js"></script>
+
+<script>
+fetch("/static/components/navbar.html")
+  .then(r => r.text())
+  .then(html => navbar.innerHTML = html);
+</script>
+
+</body>
+</html>

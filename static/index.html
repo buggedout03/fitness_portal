@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fitness Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div id="navbar"></div>
+
+<div class="container">
+  <div class="card">
+    <h2>Summary</h2>
+    <div id="summary"></div>
+  </div>
+
+  <div class="card">
+    <h2>Weight Trend</h2>
+    <div class="chart-container">
+      <canvas id="weightChart"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>GLP-1 Concentration (7-day)</h2>
+    <div class="chart-container">
+      <canvas id="glp1Chart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script src="dashboard.js"></script>
+
+<script>
+fetch("/static/components/navbar.html")
+  .then(r => r.text())
+  .then(html => document.getElementById("navbar").innerHTML = html);
+</script>
+
+</body>
+</html>
