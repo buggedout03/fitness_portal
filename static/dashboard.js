@@ -1,10 +1,14 @@
-const USER_ID = 1;  // Hard-coded for now
+// dashboard.js
 
-// ------------------------------
-// 1. Fetch Body Summary
-// ------------------------------
+// 1. Summary
 async function loadSummary() {
-    const res = await fetch(`/analytics/body/summary?user_id=${USER_ID}`);
+    const userId = await getCurrentUserId();
+    if (!userId) {
+        document.getElementById("summary").innerText = "No user selected.";
+        return;
+    }
+
+    const res = await fetch(`/analytics/body/summary?user_id=${userId}`);
     const data = await res.json();
 
     if (data.error) {
@@ -13,21 +17,22 @@ async function loadSummary() {
     }
 
     document.getElementById("summary").innerHTML = `
-      <b>Body Fat:</b> ${data.body_fat_percent.toFixed(1)}%<br>
-      <b>BMI:</b> ${data.bmi.toFixed(1)}<br>
-      <b>TDEE:</b> ${Math.round(data.tdee)} kcal/day
+      <b>Body Fat:</b> ${data.body_fat_percent != null ? data.body_fat_percent.toFixed(1) + "%" : "N/A"}<br>
+      <b>BMI:</b> ${data.bmi != null ? data.bmi.toFixed(1) : "N/A"}<br>
+      <b>TDEE:</b> ${data.tdee != null ? Math.round(data.tdee) + " kcal/day" : "N/A"}
     `;
 }
 
-// ------------------------------
-// 2. Weight Chart
-// ------------------------------
+// 2. Weight Trend (re-using /weight/list)
 async function loadWeightChart() {
-    const res = await fetch(`/analytics/weight/trends?user_id=${USER_ID}`);
-    const data = await res.json();
+    const userId = await getCurrentUserId();
+    if (!userId) return;
 
-    const labels = data.raw.map(d => d[0]);
-    const values = data.raw.map(d => d[1]);
+    const res = await fetch(`/weight/list?user_id=${userId}`);
+    const rows = await res.json();
+
+    const labels = rows.map(r => r.date);
+    const values = rows.map(r => r.weight);
 
     const ctx = document.getElementById("weightChart").getContext("2d");
     new Chart(ctx, {
@@ -40,24 +45,26 @@ async function loadWeightChart() {
                 borderColor: "#0af",
                 tension: 0.3
             }]
-        },
-        options: {
-            scales: { x: { display: false } }
         }
     });
 }
 
-// ------------------------------
-// 3. GLP-1 Decay Graph
-// ------------------------------
+// 3. GLP-1 Chart
 async function loadGLP1Chart() {
-    const res = await fetch(`/analytics/glp1/decay?user_id=${USER_ID}`);
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+
+    const res = await fetch(`/analytics/glp1?user_id=${userId}`);
     const data = await res.json();
 
-    if (data.error) return;
+    if (data.error) {
+        const ctx = document.getElementById("glp1Chart").getContext("2d");
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        return;
+    }
 
-    const labels = data.curve.map(d => d[0]);
-    const values = data.curve.map(d => d[1]);
+    const labels = data.curve.map(p => p[0]);
+    const values = data.curve.map(p => p[1]);
 
     const ctx = document.getElementById("glp1Chart").getContext("2d");
     new Chart(ctx, {
@@ -65,7 +72,7 @@ async function loadGLP1Chart() {
         data: {
             labels,
             datasets: [{
-                label: "GLP-1 Concentration",
+                label: "Concentration",
                 data: values,
                 borderColor: "#0f0",
                 tension: 0.3
@@ -74,9 +81,14 @@ async function loadGLP1Chart() {
     });
 }
 
-// ------------------------------
-// Init
-// ------------------------------
+// React to user changes
+document.addEventListener("user-changed", () => {
+    loadSummary();
+    loadWeightChart();
+    loadGLP1Chart();
+});
+
+// Initial
 loadSummary();
 loadWeightChart();
 loadGLP1Chart();

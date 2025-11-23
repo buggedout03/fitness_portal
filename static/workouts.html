@@ -22,18 +22,21 @@
 
   <div class="card">
     <h2>Workout History</h2>
-    <div id="list"></div>
+    <div id="list" class="workout-list"></div>
   </div>
 
 </div>
 
+<script src="user.js"></script>
 <script src="workouts.js"></script>
 
 <script>
-fetch("/static/components/navbar.html")
+fetch("components/navbar.html")
   .then(r => r.text())
-  .then(html => navbar.innerHTML = html);
+  .then(html => {
+    document.getElementById("navbar").innerHTML = html;
+    initUserControls();
+  });
 </script>
-
 </body>
 </html>

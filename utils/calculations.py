@@ -81,13 +81,16 @@ def navy_body_fat(height_cm, waist_cm, neck_cm, hips_cm=None, gender="male"):
     """
     Returns body fat % or None if inputs are invalid for the Navy method.
     """
-    # Basic sanity
     if not height_cm or not waist_cm or not neck_cm:
         return None
 
+    # Normalize gender to be forgiving
+    g = str(gender).strip().lower()
+    is_female = g in ("female", "f", "woman", "girl")
+
     try:
-        if gender == "male":
-            # Navy method requires waist > neck and positive height
+        if not is_female:
+            # Treat everything else as "male" by default
             if waist_cm <= neck_cm or height_cm <= 0:
                 return None
 
@@ -96,9 +99,7 @@ def navy_body_fat(height_cm, waist_cm, neck_cm, hips_cm=None, gender="male"):
                 - 70.041 * math.log10(height_cm)
                 + 36.76
             )
-
         else:
-            # For females we need hips, and waist + hips > neck
             if hips_cm is None or height_cm <= 0:
                 return None
             if waist_cm + hips_cm <= neck_cm:
@@ -110,7 +111,6 @@ def navy_body_fat(height_cm, waist_cm, neck_cm, hips_cm=None, gender="male"):
                 - 78.387
             )
     except (ValueError, TypeError):
-        # Anything weird → just say "no valid BF result"
         return None
 
 
@@ -128,10 +128,14 @@ def bmi(weight_kg, height_cm):
 # --------------------------
 
 def tdee(weight_kg, height_cm, age, gender, activity=1.2):
-    if gender == "male":
-        bmr = 10*weight_kg + 6.25*height_cm - 5*age + 5
+    g = str(gender).strip().lower()
+    is_female = g in ("female", "f", "woman", "girl")
+
+    if is_female:
+        bmr = 10 * weight_kg + 6.25 * height_cm - 5 * age - 161
     else:
-        bmr = 10*weight_kg + 6.25*height_cm - 5*age - 161
+        bmr = 10 * weight_kg + 6.25 * height_cm - 5 * age + 5
+
     return bmr * activity
 
 

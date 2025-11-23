@@ -26,13 +26,16 @@
 
 </div>
 
+<script src="user.js"></script>
 <script src="weight.js"></script>
 
 <script>
-fetch("/static/components/navbar.html")
+fetch("components/navbar.html")
   .then(r => r.text())
-  .then(html => document.getElementById("navbar").innerHTML = html);
+  .then(html => {
+    document.getElementById("navbar").innerHTML = html;
+    initUserControls();
+  });
 </script>
-
 </body>
 </html>
