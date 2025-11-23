@@ -40,13 +40,17 @@
 
 </div>
 
+<script src="user.js"></script>
 <script src="measurements.js"></script>
 
 <script>
-fetch("/static/components/navbar.html")
+fetch("components/navbar.html")
   .then(r => r.text())
-  .then(html => navbar.innerHTML = html);
+  .then(html => {
+    navbar.innerHTML = html;
+    initUserControls();
+  });
 </script>
-
 </body>
 </html>
+

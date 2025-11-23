@@ -33,11 +33,17 @@
 
 <script src="dashboard.js"></script>
 
-<script>
-fetch("/static/components/navbar.html")
-  .then(r => r.text())
-  .then(html => document.getElementById("navbar").innerHTML = html);
-</script>
+<script src="user.js"></script>
+<script src="dashboard.js"></script>
 
+<script>
+fetch("components/navbar.html")
+  .then(r => r.text())
+  .then(html => {
+    document.getElementById("navbar").innerHTML = html;
+    // Now that the navbar (and userSelect) exists:
+    initUserControls();
+  });
+</script>
 </body>
 </html>

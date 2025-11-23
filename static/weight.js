@@ -1,6 +1,13 @@
-const USER_ID = 1;
+// weight.js
+// Uses shared getCurrentUserId() from user.js
 
 async function submitWeight() {
+    const userId = await getCurrentUserId();
+    if (!userId) {
+        alert("Please create/select a user first.");
+        return;
+    }
+
     const val = document.getElementById("weightInput").value;
     if (!val) return;
 
@@ -10,17 +17,21 @@ async function submitWeight() {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
-            user_id: USER_ID,
+            user_id: userId,
             date: dateStr,
             weight: parseFloat(val)
         })
     });
 
-    location.reload();
+    document.getElementById("weightInput").value = "";
+    loadHistory();
 }
 
 async function loadHistory() {
-    const res = await fetch(`/weight/list?user_id=${USER_ID}`);
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+
+    const res = await fetch(`/weight/list?user_id=${userId}`);
     const rows = await res.json();
 
     const labels = rows.map(r => r.date);
@@ -41,4 +52,10 @@ async function loadHistory() {
     });
 }
 
+// Auto-refresh when user changes
+document.addEventListener("user-changed", () => {
+    loadHistory();
+});
+
+// Initial load
 loadHistory();

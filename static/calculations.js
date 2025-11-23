@@ -1,8 +1,15 @@
-const USER_ID = 1;
+// calculations.js
 let latestTDEE = null;
 
 async function loadSummary() {
-    const res = await fetch(`/analytics/body/summary?user_id=${USER_ID}`);
+    const userId = await getCurrentUserId();
+    if (!userId) {
+        summaryBox.innerHTML = "No user selected.";
+        latestTDEE = null;
+        return;
+    }
+
+    const res = await fetch(`/analytics/body/summary?user_id=${userId}`);
     const data = await res.json();
 
     if (data.error) {
@@ -17,26 +24,22 @@ async function loadSummary() {
     const bmiVal = data.bmi;
     const tdeeVal = data.tdee;
 
-    const bfText = (bf != null) ? `${bf.toFixed(1)}%` : "N/A";
-    const bmiText = (bmiVal != null) ? bmiVal.toFixed(1) : "N/A";
-    const tdeeText = (tdeeVal != null) ? `${Math.round(tdeeVal)} kcal/day` : "N/A";
-
     summaryBox.innerHTML = `
-        <b>Body Fat:</b> ${bfText}<br>
-        <b>BMI:</b> ${bmiText}<br>
-        <b>TDEE:</b> ${tdeeText}
+        <b>Body Fat:</b> ${bf != null ? bf.toFixed(1) + "%" : "N/A"}<br>
+        <b>BMI:</b> ${bmiVal != null ? bmiVal.toFixed(1) : "N/A"}<br>
+        <b>TDEE:</b> ${tdeeVal != null ? Math.round(tdeeVal) + " kcal/day" : "N/A"}
     `;
 }
 
 function calculateCalories() {
     if (!latestTDEE) {
-        calorieBox.innerHTML = "Load summary first or ensure TDEE is available.";
+        calorieBox.innerHTML = "No TDEE available. Refresh summary first.";
         return;
     }
 
     const rate = parseFloat(deficitRate.value);
     if (!rate || rate <= 0) {
-        calorieBox.innerHTML = "Enter a valid kg/week deficit.";
+        calorieBox.innerHTML = "Enter a positive weekly weight loss target.";
         return;
     }
 
@@ -49,6 +52,11 @@ function calculateCalories() {
         <b>Target Intake:</b> ${Math.round(target)} kcal/day
     `;
 }
+
+// Auto update on user change
+document.addEventListener("user-changed", () => {
+    loadSummary();
+});
 
 // initial
 loadSummary();

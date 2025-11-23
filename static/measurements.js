@@ -1,12 +1,18 @@
-const USER_ID = 1;
-let measurementRows = [];   // cache from API
-let chartInstance = null;   // Chart.js instance
+// measurements.js
+let measurementRows = [];
+let chartInstance = null;
 
 async function submitMeasurements() {
+    const userId = await getCurrentUserId();
+    if (!userId) {
+        alert("Please create/select a user first.");
+        return;
+    }
+
     const dateStr = new Date().toISOString().split("T")[0];
 
     const payload = {
-        user_id: USER_ID,
+        user_id: userId,
         date: dateStr,
         waist_cm: parseFloat(waist.value),
         hips_cm: parseFloat(hips.value),
@@ -21,29 +27,30 @@ async function submitMeasurements() {
         body: JSON.stringify(payload)
     });
 
-    location.reload();
+    loadData();
 }
 
 async function loadData() {
-    const res = await fetch(`/measurements/list?user_id=${USER_ID}`);
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+
+    const res = await fetch(`/measurements/list?user_id=${userId}`);
     measurementRows = await res.json();
     renderChart();
 }
 
 function renderChart() {
-    if (!measurementRows.length) return;
-
     const metric = document.getElementById("metricSelect").value;
 
     const labels = measurementRows.map(r => r.date);
     const values = measurementRows.map(r => r[metric]);
 
-    // destroy previous chart if it exists
+    const ctx = document.getElementById("measurementChart").getContext("2d");
+
     if (chartInstance) {
         chartInstance.destroy();
     }
 
-    const ctx = document.getElementById("measurementChart").getContext("2d");
     chartInstance = new Chart(ctx, {
         type: "line",
         data: {
@@ -51,7 +58,7 @@ function renderChart() {
             datasets: [{
                 label: metricLabel(metric),
                 data: values,
-                borderColor: "#f55",
+                borderColor: "#f80",
                 tension: 0.3
             }]
         }
@@ -69,5 +76,10 @@ function metricLabel(metric) {
     }
 }
 
-// initial load
+// Update when user changes
+document.addEventListener("user-changed", () => {
+    loadData();
+});
+
+// Initial load
 loadData();
