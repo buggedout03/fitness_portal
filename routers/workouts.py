@@ -13,7 +13,13 @@ def get_db():
 
 @router.post("/add")
 def add_workout(workout: schemas.WorkoutCreate, db: Session = Depends(get_db)):
-    db_log = models.Workout(**workout.dict())
+    db_log = models.Workout(
+        user_id=workout.user_id,
+        date=workout.date.isoformat(),  
+        name=workout.name,
+        exercises_json=workout.exercises_json,
+        duration=workout.duration,
+    )
     db.add(db_log)
     db.commit()
     db.refresh(db_log)
@@ -24,6 +30,6 @@ def list_workouts(user_id: int, db: Session = Depends(get_db)):
     return (
         db.query(models.Workout)
         .filter(models.Workout.user_id == user_id)
-        .order_by(models.Workout.date.desc())
+        .order_by(models.Workout.date.desc(), models.Workout.id.desc())
         .all()
     )

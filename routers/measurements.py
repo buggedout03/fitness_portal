@@ -16,7 +16,7 @@ def add_measurements(log: schemas.MeasurementCreate, db: Session = Depends(get_d
     last_log = (
         db.query(models.MeasurementLog)
         .filter(models.MeasurementLog.user_id == log.user_id)
-        .order_by(models.MeasurementLog.date.desc())
+        .order_by(models.MeasurementLog.date.desc(), models.MeasurementLog.id.desc())
         .first()
     )
 
@@ -29,7 +29,7 @@ def add_measurements(log: schemas.MeasurementCreate, db: Session = Depends(get_d
 
     db_log = models.MeasurementLog(
         user_id=log.user_id,
-        date=log.date,
+        date=log.date.isoformat(),   
         waist_cm=log.waist_cm,
         hips_cm=log.hips_cm,
         neck_cm=log.neck_cm,
@@ -50,6 +50,6 @@ def list_measurements(user_id: int, db: Session = Depends(get_db)):
     return (
         db.query(models.MeasurementLog)
         .filter(models.MeasurementLog.user_id == user_id)
-        .order_by(models.MeasurementLog.date.asc())
+        .order_by(models.MeasurementLog.date.asc(), models.MeasurementLog.id.asc())
         .all()
     )
