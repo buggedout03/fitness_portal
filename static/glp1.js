@@ -31,7 +31,7 @@ async function loadDecay() {
     const userId = await getCurrentUserId();
     if (!userId) return;
 
-    const res = await fetch(`/analytics/glp1?user_id=${userId}`);
+    const res = await fetch(`/analytics/glp1/decay?user_id=${userId}`);
     const data = await res.json();
 
     if (data.error) {
