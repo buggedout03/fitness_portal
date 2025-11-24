@@ -1,3 +1,4 @@
+# models.py
 from sqlalchemy import Column, Integer, String, Float, Text, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
@@ -11,6 +12,7 @@ class User(Base):
     height_cm = Column(Integer)
     gender = Column(String)
 
+
 class WeightLog(Base):
     __tablename__ = "weight_logs"
 
@@ -18,7 +20,8 @@ class WeightLog(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     date = Column(String)
     weight = Column(Float)
-    delta = Column(Float)
+    
+
 
 class MeasurementLog(Base):
     __tablename__ = "measurement_logs"
@@ -31,9 +34,8 @@ class MeasurementLog(Base):
     neck_cm = Column(Float)
     shoulder_cm = Column(Float)
     chest_cm = Column(Float)
-    delta_waist = Column(Float)
-    delta_hips = Column(Float)
-    delta_neck = Column(Float)
+    
+
 
 class Workout(Base):
     __tablename__ = "workouts"
@@ -45,6 +47,7 @@ class Workout(Base):
     exercises_json = Column(Text)
     duration = Column(Integer)
 
+
 class PR(Base):
     __tablename__ = "prs"
 
@@ -54,6 +57,7 @@ class PR(Base):
     weight = Column(Float)
     reps = Column(Integer)
     date = Column(String)
+
 
 class GLP1(Base):
     __tablename__ = "glp1_logs"
