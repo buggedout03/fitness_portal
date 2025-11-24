@@ -11,45 +11,42 @@ def get_db():
     finally:
         db.close()
 
+
 @router.post("/add")
-def add_measurements(log: schemas.MeasurementCreate, db: Session = Depends(get_db)):
-    last_log = (
-        db.query(models.MeasurementLog)
-        .filter(models.MeasurementLog.user_id == log.user_id)
-        .order_by(models.MeasurementLog.date.desc(), models.MeasurementLog.id.desc())
-        .first()
-    )
-
-    delta_waist = delta_hips = delta_neck = None
-
-    if last_log:
-        delta_waist = log.waist_cm - last_log.waist_cm
-        delta_hips = log.hips_cm - last_log.hips_cm
-        delta_neck = log.neck_cm - last_log.neck_cm
-
-    db_log = models.MeasurementLog(
+def add_weight(log: schemas.WeightCreate, db: Session = Depends(get_db)):
+    # Just store raw log. No delta persistence.
+    db_log = models.WeightLog(
         user_id=log.user_id,
-        date=log.date.isoformat(),   
-        waist_cm=log.waist_cm,
-        hips_cm=log.hips_cm,
-        neck_cm=log.neck_cm,
-        shoulder_cm=log.shoulder_cm,
-        chest_cm=log.chest_cm,
-        delta_waist=delta_waist,
-        delta_hips=delta_hips,
-        delta_neck=delta_neck,
+        date=log.date,
+        weight=log.weight,
+        delta=None,
     )
-
     db.add(db_log)
     db.commit()
     db.refresh(db_log)
     return db_log
 
+
 @router.get("/list")
-def list_measurements(user_id: int, db: Session = Depends(get_db)):
-    return (
-        db.query(models.MeasurementLog)
-        .filter(models.MeasurementLog.user_id == user_id)
-        .order_by(models.MeasurementLog.date.asc(), models.MeasurementLog.id.asc())
+def list_weights(user_id: int, db: Session = Depends(get_db)):
+    rows = (
+        db.query(models.WeightLog)
+        .filter(models.WeightLog.user_id == user_id)
+        .order_by(models.WeightLog.date.asc(), models.WeightLog.id.asc())
         .all()
     )
+
+    out = []
+    prev = None
+    for r in rows:
+        d = None if prev is None else r.weight - prev.weight
+        out.append({
+            "id": r.id,
+            "user_id": r.user_id,
+            "date": r.date,
+            "weight": r.weight,
+            "delta": d,  # computed, always correct
+        })
+        prev = r
+
+    return out
