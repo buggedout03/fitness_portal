@@ -11,37 +11,42 @@ def get_db():
     finally:
         db.close()
 
+
 @router.post("/add")
 def add_weight(log: schemas.WeightCreate, db: Session = Depends(get_db)):
-    # Get latest existing entry to calculate delta
-    last_log = (
-        db.query(models.WeightLog)
-        .filter(models.WeightLog.user_id == log.user_id)
-        .order_by(models.WeightLog.date.desc(), models.WeightLog.id.desc())
-        .first()
-    )
-
-    delta = None
-    if last_log:
-        delta = log.weight - last_log.weight
-
+    # Just store raw log. No delta persistence.
     db_log = models.WeightLog(
         user_id=log.user_id,
-        date=log.date.isoformat(),  
+        date=log.date,
         weight=log.weight,
-        delta=delta,
+        delta=None,
     )
-
     db.add(db_log)
     db.commit()
     db.refresh(db_log)
     return db_log
 
+
 @router.get("/list")
 def list_weights(user_id: int, db: Session = Depends(get_db)):
-    return (
+    rows = (
         db.query(models.WeightLog)
         .filter(models.WeightLog.user_id == user_id)
         .order_by(models.WeightLog.date.asc(), models.WeightLog.id.asc())
         .all()
     )
+
+    out = []
+    prev = None
+    for r in rows:
+        d = None if prev is None else r.weight - prev.weight
+        out.append({
+            "id": r.id,
+            "user_id": r.user_id,
+            "date": r.date,
+            "weight": r.weight,
+            "delta": d,  # computed, always correct
+        })
+        prev = r
+
+    return out
