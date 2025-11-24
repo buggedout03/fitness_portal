@@ -1,6 +1,7 @@
+# weight.py
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-import database, crud, schemas, models
+import database, schemas, models
 
 router = APIRouter()
 
@@ -14,17 +15,23 @@ def get_db():
 
 @router.post("/add")
 def add_weight(log: schemas.WeightCreate, db: Session = Depends(get_db)):
-    # Just store raw log. No delta persistence.
+    # Just store raw log; no delta field anymore
     db_log = models.WeightLog(
         user_id=log.user_id,
         date=log.date,
         weight=log.weight,
-        delta=None,
     )
     db.add(db_log)
     db.commit()
     db.refresh(db_log)
-    return db_log
+    # optional: return shape with delta=None for compatibility
+    return {
+        "id": db_log.id,
+        "user_id": db_log.user_id,
+        "date": db_log.date,
+        "weight": db_log.weight,
+        "delta": None,
+    }
 
 
 @router.get("/list")
@@ -45,7 +52,7 @@ def list_weights(user_id: int, db: Session = Depends(get_db)):
             "user_id": r.user_id,
             "date": r.date,
             "weight": r.weight,
-            "delta": d,  # computed, always correct
+            "delta": d,  # computed on the fly
         })
         prev = r
 
