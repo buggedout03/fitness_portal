@@ -31,7 +31,7 @@
 <script src="glp1.js"></script>
 
 <script>
-fetch("/static/components/navbar.html")
+fetch("/components/navbar.html")
   .then(r => r.text())
   .then(html => {
     document.getElementById("navbar").innerHTML = html;

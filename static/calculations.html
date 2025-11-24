@@ -33,9 +33,10 @@
 fetch("components/navbar.html")
   .then(r => r.text())
   .then(html => {
-    navbar.innerHTML = html;
+    document.getElementById("navbar").innerHTML = html;
     initUserControls();
   });
+
 </script>
 </body>
 </html>
