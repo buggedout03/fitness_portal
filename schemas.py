@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from datetime import date
 from typing import Optional
 
@@ -44,7 +44,17 @@ class PRCreate(BaseModel):
 
 class GLP1Create(BaseModel):
     user_id: int
-    dose_mg: float
-    date: date                     
-    half_life_days: float
+    dose_mg: float = Field(..., gt=0, description="Dose must be positive")
+    date: str
+    half_life_days: float = Field(..., gt=0, description="Half-life must be > 0")
     concentration: float
+
+    @validator("date")
+    def validate_date(cls, v):
+        # Optional but recommended: enforce correct date format
+        import datetime
+        try:
+            datetime.datetime.strptime(v, "%Y-%m-%d")
+        except ValueError:
+            raise ValueError("date must be in YYYY-MM-DD format")
+        return v
