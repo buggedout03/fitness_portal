@@ -13,7 +13,13 @@ def get_db():
 
 @router.post("/add")
 def add_pr(pr: schemas.PRCreate, db: Session = Depends(get_db)):
-    db_record = models.PR(**pr.dict())
+    db_record = models.PR(
+        user_id=pr.user_id,
+        exercise_name=pr.exercise_name,
+        weight=pr.weight,
+        reps=pr.reps,
+        date=pr.date.isoformat(),   
+    )
     db.add(db_record)
     db.commit()
     db.refresh(db_record)
@@ -24,6 +30,6 @@ def list_prs(user_id: int, db: Session = Depends(get_db)):
     return (
         db.query(models.PR)
         .filter(models.PR.user_id == user_id)
-        .order_by(models.PR.date.desc())
+        .order_by(models.PR.date.desc(), models.PR.id.desc())
         .all()
     )

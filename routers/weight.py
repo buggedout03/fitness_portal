@@ -17,7 +17,7 @@ def add_weight(log: schemas.WeightCreate, db: Session = Depends(get_db)):
     last_log = (
         db.query(models.WeightLog)
         .filter(models.WeightLog.user_id == log.user_id)
-        .order_by(models.WeightLog.date.desc())
+        .order_by(models.WeightLog.date.desc(), models.WeightLog.id.desc())
         .first()
     )
 
@@ -27,7 +27,7 @@ def add_weight(log: schemas.WeightCreate, db: Session = Depends(get_db)):
 
     db_log = models.WeightLog(
         user_id=log.user_id,
-        date=log.date,
+        date=log.date.isoformat(),  
         weight=log.weight,
         delta=delta,
     )
@@ -42,6 +42,6 @@ def list_weights(user_id: int, db: Session = Depends(get_db)):
     return (
         db.query(models.WeightLog)
         .filter(models.WeightLog.user_id == user_id)
-        .order_by(models.WeightLog.date.asc())
+        .order_by(models.WeightLog.date.asc(), models.WeightLog.id.asc())
         .all()
     )

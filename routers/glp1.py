@@ -13,7 +13,13 @@ def get_db():
 
 @router.post("/add")
 def add_glp1_entry(entry: schemas.GLP1Create, db: Session = Depends(get_db)):
-    db_entry = models.GLP1(**entry.dict())
+    db_entry = models.GLP1(
+        user_id=entry.user_id,
+        dose_mg=entry.dose_mg,
+        date=entry.date.isoformat(),    
+        half_life_days=entry.half_life_days,
+        concentration=entry.concentration,
+    )
     db.add(db_entry)
     db.commit()
     db.refresh(db_entry)
@@ -24,6 +30,6 @@ def list_glp1(user_id: int, db: Session = Depends(get_db)):
     return (
         db.query(models.GLP1)
         .filter(models.GLP1.user_id == user_id)
-        .order_by(models.GLP1.date.desc())
+        .order_by(models.GLP1.date.desc(), models.GLP1.id.desc())
         .all()
     )
