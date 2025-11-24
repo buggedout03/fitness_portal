@@ -16,3 +16,5 @@ app.include_router(glp1.router, prefix="/glp1", tags=["GLP1"])
 app.include_router(analytics.router, prefix="/analytics", tags=["Analytics"])
 
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
+
+#stable v1
