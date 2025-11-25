@@ -49,9 +49,16 @@ fetch("components/navbar.html")
   .then(html => {
     document.getElementById("navbar").innerHTML = html;
     initUserControls();
-  });
 
+    // After users are loaded, refresh measurements for the current user
+    setTimeout(() => {
+      if (typeof refreshMeasurements === "function") {
+        refreshMeasurements();
+      }
+    }, 200);
+  });
 </script>
+
 </body>
 </html>
 

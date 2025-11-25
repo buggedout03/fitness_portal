@@ -31,12 +31,18 @@
 <script src="glp1.js"></script>
 
 <script>
-fetch("/components/navbar.html")
+fetch("components/navbar.html")
   .then(r => r.text())
   .then(html => {
     document.getElementById("navbar").innerHTML = html;
     initUserControls();
+    setTimeout(() => {
+      if (typeof refreshGLP === "function") {
+        refreshGLP();
+      }
+    }, 200);
   });
 </script>
+
 </body>
 </html>

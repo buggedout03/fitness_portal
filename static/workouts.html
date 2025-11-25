@@ -36,7 +36,13 @@ fetch("components/navbar.html")
   .then(html => {
     document.getElementById("navbar").innerHTML = html;
     initUserControls();
+    setTimeout(() => {
+      if (typeof refreshWorkouts === "function") {
+        refreshWorkouts();
+      }
+    }, 200);
   });
 </script>
+
 </body>
 </html>

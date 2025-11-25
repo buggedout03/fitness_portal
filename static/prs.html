@@ -34,7 +34,13 @@ fetch("components/navbar.html")
   .then(html => {
     document.getElementById("navbar").innerHTML = html;
     initUserControls();
+    setTimeout(() => {
+      if (typeof refreshPRs === "function") {
+        refreshPRs();
+      }
+    }, 200);
   });
 </script>
+
 </body>
 </html>
