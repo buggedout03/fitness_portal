@@ -20,23 +20,23 @@ async function submitWorkout() {
   }
 
   const name = document.getElementById("workoutName").value.trim();
-  const exercisesText = document.getElementById("exercises").value.trim();
+  let exercisesText = document.getElementById("exercises").value.trim();
 
   if (!name) {
     alert("Please enter a workout name.");
     return;
   }
   if (!exercisesText) {
-    alert("Please enter exercises JSON.");
+    alert("Please enter exercises.");
     return;
   }
 
-  // Validate JSON
+  // Try to parse as JSON; if it fails, wrap as ["text"]
   try {
     JSON.parse(exercisesText);
   } catch (e) {
-    alert("Exercises must be valid JSON.");
-    return;
+    // treat textarea as a plain description, store as JSON array of one string
+    exercisesText = JSON.stringify([exercisesText]);
   }
 
   const today = new Date().toISOString().slice(0, 10);
