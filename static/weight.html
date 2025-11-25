@@ -35,7 +35,13 @@ fetch("components/navbar.html")
   .then(html => {
     document.getElementById("navbar").innerHTML = html;
     initUserControls();
+    setTimeout(() => {
+      if (typeof refreshWeightHistory === "function") {
+        refreshWeightHistory();
+      }
+    }, 200);
   });
 </script>
+
 </body>
 </html>

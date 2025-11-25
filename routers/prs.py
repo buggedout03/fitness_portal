@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import database, schemas, models
 
+
 router = APIRouter()
 
 def get_db():
@@ -18,7 +19,7 @@ def add_pr(pr: schemas.PRCreate, db: Session = Depends(get_db)):
         exercise_name=pr.exercise_name,
         weight=pr.weight,
         reps=pr.reps,
-        date=pr.date.isoformat(),   
+        date=pr.date,
     )
     db.add(db_record)
     db.commit()
