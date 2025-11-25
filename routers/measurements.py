@@ -1,5 +1,5 @@
 # measurements.py
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import database, schemas, models
 
@@ -73,3 +73,39 @@ def list_measurements(user_id: int, db: Session = Depends(get_db)):
         prev = r
 
     return out
+
+@router.put("/{log_id}")
+def update_measurements(log_id: int, log: schemas.MeasurementCreate, db: Session = Depends(get_db)):
+    """
+    Full update of an existing measurement log.
+    NOTE: delta_* not recalculated yet – Phase 3 will fix deltas globally.
+    """
+    db_log = db.query(models.MeasurementLog).filter(models.MeasurementLog.id == log_id).first()
+    if not db_log:
+        raise HTTPException(status_code=404, detail="Measurement log not found")
+
+    if db_log.user_id != log.user_id:
+        raise HTTPException(status_code=400, detail="Cannot change user_id of a log")
+
+    db_log.date = log.date
+    db_log.waist_cm = log.waist_cm
+    db_log.hips_cm = log.hips_cm
+    db_log.neck_cm = log.neck_cm
+    db_log.shoulder_cm = log.shoulder_cm
+    db_log.chest_cm = log.chest_cm
+    # delta_waist / delta_hips / delta_neck left as-is for now
+
+    db.commit()
+    db.refresh(db_log)
+    return db_log
+
+
+@router.delete("/{log_id}")
+def delete_measurements(log_id: int, db: Session = Depends(get_db)):
+    db_log = db.query(models.MeasurementLog).filter(models.MeasurementLog.id == log_id).first()
+    if not db_log:
+        raise HTTPException(status_code=404, detail="Measurement log not found")
+
+    db.delete(db_log)
+    db.commit()
+    return {"status": "deleted"}

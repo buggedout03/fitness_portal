@@ -38,3 +38,35 @@ def list_workouts(user_id: int, db: Session = Depends(get_db)):
         .order_by(models.Workout.date.desc(), models.Workout.id.desc())
         .all()
     )
+
+@router.put("/{workout_id}")
+def update_workout(workout_id: int, workout: schemas.WorkoutCreate, db: Session = Depends(get_db)):
+    db_log = db.query(models.Workout).filter(models.Workout.id == workout_id).first()
+    if not db_log:
+        raise HTTPException(status_code=404, detail="Workout not found")
+
+    if db_log.user_id != workout.user_id:
+        raise HTTPException(status_code=400, detail="Cannot change user_id of a workout")
+
+    db_log.date = workout.date
+    db_log.name = workout.name
+    db_log.exercises_json = workout.exercises_json
+    db_log.duration = workout.duration
+
+    db.commit()
+    db.refresh(db_log)
+    return db_log
+
+
+@router.delete("/{workout_id}")
+def delete_workout(workout_id: int, db: Session = Depends(get_db)):
+    db_log = db.query(models.Workout).filter(models.Workout.id == workout_id).first()
+    if not db_log:
+        raise HTTPException(status_code=404, detail="Workout not found")
+
+    db.delete(db_log)
+    db.commit()
+    return {"status": "deleted"}
+
+
+
