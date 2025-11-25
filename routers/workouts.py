@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import database, schemas, models
 
@@ -13,13 +13,18 @@ def get_db():
 
 @router.post("/add")
 def add_workout(workout: schemas.WorkoutCreate, db: Session = Depends(get_db)):
-    db_log = models.Workout(
-        user_id=workout.user_id,
-        date=workout.date.isoformat(),  
-        name=workout.name,
-        exercises_json=workout.exercises_json,
-        duration=workout.duration,
-    )
+    # Ensure the string is valid JSON to avoid later surprises
+    try:
+        parsed = json.loads(workout.exercises_json)
+        if not isinstance(parsed, list):
+            raise ValueError("exercises_json must be a JSON array")
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid exercises_json: {e}"
+        )
+
+    db_log = models.Workout(**workout.dict())
     db.add(db_log)
     db.commit()
     db.refresh(db_log)

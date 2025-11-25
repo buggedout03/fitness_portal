@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import database, schemas, models
 
@@ -10,20 +10,21 @@ def get_db():
         yield db
     finally:
         db.close()
-
+        
 @router.post("/add")
 def add_glp1_entry(entry: schemas.GLP1Create, db: Session = Depends(get_db)):
-    db_entry = models.GLP1(
-        user_id=entry.user_id,
-        dose_mg=entry.dose_mg,
-        date=entry.date.isoformat(),    
-        half_life_days=entry.half_life_days,
-        concentration=entry.concentration,
-    )
+    # extra safety (Pydantic already enforces > 0, but this gives nicer messages if you tweak ranges later)
+    if entry.dose_mg <= 0:
+        raise HTTPException(status_code=400, detail="dose_mg must be > 0")
+    if entry.half_life_days <= 0:
+        raise HTTPException(status_code=400, detail="half_life_days must be > 0")
+
+    db_entry = models.GLP1(**entry.dict())
     db.add(db_entry)
     db.commit()
     db.refresh(db_entry)
     return db_entry
+
 
 @router.get("/list")
 def list_glp1(user_id: int, db: Session = Depends(get_db)):
