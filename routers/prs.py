@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import database, schemas, models
 
@@ -33,3 +33,33 @@ def list_prs(user_id: int, db: Session = Depends(get_db)):
         .order_by(models.PR.date.desc(), models.PR.id.desc())
         .all()
     )
+
+@router.put("/{pr_id}")
+def update_pr(pr_id: int, pr: schemas.PRCreate, db: Session = Depends(get_db)):
+    db_record = db.query(models.PR).filter(models.PR.id == pr_id).first()
+    if not db_record:
+        raise HTTPException(status_code=404, detail="PR record not found")
+
+    if db_record.user_id != pr.user_id:
+        raise HTTPException(status_code=400, detail="Cannot change user_id of a PR")
+
+    db_record.exercise_name = pr.exercise_name
+    db_record.weight = pr.weight
+    db_record.reps = pr.reps
+    db_record.date = pr.date
+
+    db.commit()
+    db.refresh(db_record)
+    return db_record
+
+
+@router.delete("/{pr_id}")
+def delete_pr(pr_id: int, db: Session = Depends(get_db)):
+    db_record = db.query(models.PR).filter(models.PR.id == pr_id).first()
+    if not db_record:
+        raise HTTPException(status_code=404, detail="PR record not found")
+
+    db.delete(db_record)
+    db.commit()
+    return {"status": "deleted"}
+
