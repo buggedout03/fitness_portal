@@ -10,7 +10,7 @@ from utils.calculations import (
 
 router = APIRouter()
 
-def get_db():
+def get_db():   
     db = database.SessionLocal()
     try:
         yield db
@@ -27,7 +27,7 @@ def weight_trends(user_id: int, db: Session = Depends(get_db)):
     rows = (
         db.query(models.WeightLog)
         .filter(models.WeightLog.user_id == user_id)
-        .order_by(models.WeightLog.date.asc())
+        .order_by(models.WeightLog.date.asc(), models.WeightLog.id.asc())
         .all()
     )
 
@@ -53,7 +53,7 @@ def measurement_trends(user_id: int, db: Session = Depends(get_db)):
     rows = (
         db.query(models.MeasurementLog)
         .filter(models.MeasurementLog.user_id == user_id)
-        .order_by(models.MeasurementLog.date.asc())
+        .order_by(models.MeasurementLog.date.asc(), models.MeasurementLog.id.asc())
         .all()
     )
 
@@ -157,7 +157,7 @@ def glp1_decay(user_id: int, db: Session = Depends(get_db)):
     entry = (
         db.query(models.GLP1)
         .filter(models.GLP1.user_id == user_id)
-        .order_by(models.GLP1.date.desc())
+        .order_by(models.GLP1.date.desc(), models.GLP1.id.desc())
         .first()
     )
 
