@@ -27,6 +27,29 @@ def rolling_average(data: List[Tuple[str, float]], days: int):
 
     return sum(filtered) / len(filtered)
 
+def rolling_average_from_last(data: List[Tuple[str, float]], days: int):
+    """
+    Rolling average using last logged date as the anchor rather than today.
+    """
+    if not data:
+        return None
+
+    # data is sorted from oldest → newest
+    _, last_value_date = data[-1]
+    last_date = datetime.strptime(data[-1][0], "%Y-%m-%d")
+
+    cutoff = last_date - timedelta(days=days)
+
+    filtered = [
+        v for (d, v) in data
+        if datetime.strptime(d, "%Y-%m-%d") >= cutoff
+    ]
+
+    if not filtered:
+        return None
+
+    return sum(filtered) / len(filtered)
+
 
 # --------------------------
 # Linear Regression
