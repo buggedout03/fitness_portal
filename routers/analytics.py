@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
 import database, models
@@ -90,7 +90,9 @@ def measurement_trends(user_id: int, db: Session = Depends(get_db)):
 def body_summary(user_id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
 
-    # Grab ALL measurements, newest → oldest
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     measurement_rows = (
         db.query(models.MeasurementLog)
         .filter(models.MeasurementLog.user_id == user_id)
@@ -98,7 +100,9 @@ def body_summary(user_id: int, db: Session = Depends(get_db)):
         .all()
     )
 
-    # Latest weight only
+    if not measurement_rows:
+        raise HTTPException(status_code=400, detail="No measurement logs found")
+
     latest_weight = (
         db.query(models.WeightLog)
         .filter(models.WeightLog.user_id == user_id)
@@ -106,10 +110,10 @@ def body_summary(user_id: int, db: Session = Depends(get_db)):
         .first()
     )
 
-    if not (user and measurement_rows and latest_weight):
-        return {"error": "missing data"}
+    if not latest_weight:
+        raise HTTPException(status_code=400, detail="No weight logs found")
 
-    # Find the most recent measurement row that produces a valid BF%
+    # --- compute body fat ---
     bf = None
     used_measurement_id = None
 
@@ -126,25 +130,14 @@ def body_summary(user_id: int, db: Session = Depends(get_db)):
             used_measurement_id = m.id
             break
 
-    # BMI & TDEE (should basically always work if height & weight are sane)
-    bmi_val = None
-    tdee_val = None
-
-    try:
-        bmi_val = bmi(latest_weight.weight, user.height_cm)
-    except Exception:
-        pass
-
-    try:
-        tdee_val = tdee(latest_weight.weight, user.height_cm, user.age, user.gender)
-    except Exception:
-        pass
+    # BMI and TDEE
+    bmi_val = bmi(latest_weight.weight, user.height_cm)
+    tdee_val = tdee(latest_weight.weight, user.height_cm, user.age, user.gender)
 
     return {
         "body_fat_percent": bf,
         "bmi": bmi_val,
         "tdee": tdee_val,
-        # optional debug info, front-end can ignore this
         "measurement_used_id": used_measurement_id,
     }
 
