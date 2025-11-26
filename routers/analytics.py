@@ -61,24 +61,6 @@ def measurement_trends(user_id: int, db: Session = Depends(get_db)):
     neck = [(r.date, r.neck_cm) for r in rows]
 
     return {
-<<<<<<< HEAD
-        "waist": {
-            "rolling_30": rolling_average(waist, 30),
-            "regression": linear_regression(waist),
-            "raw": waist
-        },
-        "hips": {
-            "rolling_30": rolling_average(hips, 30),
-            "regression": linear_regression(hips),
-            "raw": hips
-        },
-        "neck": {
-            "rolling_30": rolling_average(neck, 30),
-            "regression": linear_regression(neck),
-            "raw": neck
-        }
-    }
-=======
     "waist": {
         "rolling_30": rolling_average_from_last(waist, 30),
         "regression": linear_regression(waist),
@@ -96,7 +78,6 @@ def measurement_trends(user_id: int, db: Session = Depends(get_db)):
     }
 }
 
->>>>>>> cleanup
 
 
 # --------------------------
@@ -108,13 +89,9 @@ def measurement_trends(user_id: int, db: Session = Depends(get_db)):
 def body_summary(user_id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
 
-<<<<<<< HEAD
-    # Grab ALL measurements, newest → oldest
-=======
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
->>>>>>> cleanup
     measurement_rows = (
         db.query(models.MeasurementLog)
         .filter(models.MeasurementLog.user_id == user_id)
@@ -122,13 +99,9 @@ def body_summary(user_id: int, db: Session = Depends(get_db)):
         .all()
     )
 
-<<<<<<< HEAD
-    # Latest weight only
-=======
     if not measurement_rows:
         raise HTTPException(status_code=400, detail="No measurement logs found")
 
->>>>>>> cleanup
     latest_weight = (
         db.query(models.WeightLog)
         .filter(models.WeightLog.user_id == user_id)
@@ -136,17 +109,10 @@ def body_summary(user_id: int, db: Session = Depends(get_db)):
         .first()
     )
 
-<<<<<<< HEAD
-    if not (user and measurement_rows and latest_weight):
-        return {"error": "missing data"}
-
-    # Find the most recent measurement row that produces a valid BF%
-=======
     if not latest_weight:
         raise HTTPException(status_code=400, detail="No weight logs found")
 
     # --- compute body fat ---
->>>>>>> cleanup
     bf = None
     used_measurement_id = None
 
@@ -163,34 +129,14 @@ def body_summary(user_id: int, db: Session = Depends(get_db)):
             used_measurement_id = m.id
             break
 
-<<<<<<< HEAD
-    # BMI & TDEE (should basically always work if height & weight are sane)
-    bmi_val = None
-    tdee_val = None
-
-    try:
-        bmi_val = bmi(latest_weight.weight, user.height_cm)
-    except Exception:
-        pass
-
-    try:
-        tdee_val = tdee(latest_weight.weight, user.height_cm, user.age, user.gender)
-    except Exception:
-        pass
-=======
     # BMI and TDEE
     bmi_val = bmi(latest_weight.weight, user.height_cm)
     tdee_val = tdee(latest_weight.weight, user.height_cm, user.age, user.gender)
->>>>>>> cleanup
 
     return {
         "body_fat_percent": bf,
         "bmi": bmi_val,
         "tdee": tdee_val,
-<<<<<<< HEAD
-        # optional debug info, front-end can ignore this
-=======
->>>>>>> cleanup
         "measurement_used_id": used_measurement_id,
     }
 
