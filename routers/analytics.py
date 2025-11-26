@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from datetime import datetime
 import database, models
 from utils.calculations import (
-    rolling_average, rolling_average_from_last, linear_regression,
+    rolling_average_from_last, linear_regression,
     navy_body_fat, bmi, tdee,
     glp1_daily_concentrations
 )
+
 
 router = APIRouter()
 

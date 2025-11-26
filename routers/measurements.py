@@ -93,7 +93,6 @@ def update_measurements(log_id: int, log: schemas.MeasurementCreate, db: Session
     db_log.neck_cm = log.neck_cm
     db_log.shoulder_cm = log.shoulder_cm
     db_log.chest_cm = log.chest_cm
-    # delta_waist / delta_hips / delta_neck left as-is for now
 
     db.commit()
     db.refresh(db_log)
