@@ -3,34 +3,23 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 
 DATABASE_URL = "sqlite:///./fitness.db"
 
-# Create engine with busy timeout (prevents "database is locked")
 engine = create_engine(
     DATABASE_URL,
     connect_args={
         "check_same_thread": False,
-        "timeout": 30  # seconds
+        "timeout": 30
     }
 )
 
-# Enable WAL mode and foreign key enforcement on every DB connection
 @event.listens_for(engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
 
     cursor.execute("PRAGMA journal_mode=WAL;")
-
     cursor.execute("PRAGMA foreign_keys=ON;")
-
     cursor.execute("PRAGMA synchronous=NORMAL;")
 
     cursor.close()
-
-@event.listens_for(engine, "connect")
-def enable_foreign_keys(dbapi_connection, connection_record):
-    cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA foreign_keys=ON;")
-    cursor.close()
-
 
 SessionLocal = sessionmaker(
     autocommit=False,
