@@ -72,7 +72,10 @@ def update_weight(log_id: int, log: schemas.WeightCreate, db: Session = Depends(
 
     db_log.date = log.date
     db_log.weight = log.weight
+<<<<<<< HEAD
     # db_log.delta will be handled when we implement recompute.
+=======
+>>>>>>> cleanup
 
     db.commit()
     db.refresh(db_log)
