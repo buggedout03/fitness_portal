@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 import database, models
 from utils.calculations import (
-    rolling_average, linear_regression,
+    rolling_average, rolling_average_from_last, linear_regression,
     navy_body_fat, bmi, tdee,
     glp1_daily_concentrations
 )
@@ -34,12 +34,12 @@ def weight_trends(user_id: int, db: Session = Depends(get_db)):
     data = [(r.date, r.weight) for r in rows]
 
     return {
-        "rolling_7": rolling_average(data, 7),
-        "rolling_30": rolling_average(data, 30),
-        "rolling_90": rolling_average(data, 90),
-        "rolling_180": rolling_average(data, 180),
-        "rolling_365": rolling_average(data, 365),
-        "regression": linear_regression(data),
+        "rolling_7": rolling_average_from_last(data, 7),
+        "rolling_30": rolling_average_from_last(data, 30),
+        "rolling_90": rolling_average_from_last(data, 90),
+        "rolling_180": rolling_average_from_last(data, 180),
+        "rolling_365": rolling_average_from_last(data, 365),
+
         "raw": data
     }
 
@@ -62,22 +62,23 @@ def measurement_trends(user_id: int, db: Session = Depends(get_db)):
     neck = [(r.date, r.neck_cm) for r in rows]
 
     return {
-        "waist": {
-            "rolling_30": rolling_average(waist, 30),
-            "regression": linear_regression(waist),
-            "raw": waist
-        },
-        "hips": {
-            "rolling_30": rolling_average(hips, 30),
-            "regression": linear_regression(hips),
-            "raw": hips
-        },
-        "neck": {
-            "rolling_30": rolling_average(neck, 30),
-            "regression": linear_regression(neck),
-            "raw": neck
-        }
+    "waist": {
+        "rolling_30": rolling_average_from_last(waist, 30),
+        "regression": linear_regression(waist),
+        "raw": waist
+    },
+    "hips": {
+        "rolling_30": rolling_average_from_last(hips, 30),
+        "regression": linear_regression(hips),
+        "raw": hips
+    },
+    "neck": {
+        "rolling_30": rolling_average_from_last(neck, 30),
+        "regression": linear_regression(neck),
+        "raw": neck
     }
+}
+
 
 
 # --------------------------
